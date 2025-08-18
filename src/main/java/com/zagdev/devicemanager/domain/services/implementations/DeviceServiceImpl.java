@@ -2,12 +2,17 @@ package com.zagdev.devicemanager.domain.services.implementations;
 
 import com.zagdev.devicemanager.domain.dto.DeviceDto;
 import com.zagdev.devicemanager.domain.entities.Device;
+import com.zagdev.devicemanager.domain.exceptions.DataNotFoundException;
+import com.zagdev.devicemanager.domain.exceptions.ErrorCode;
 import com.zagdev.devicemanager.domain.repositories.DeviceRepository;
 import com.zagdev.devicemanager.domain.services.DeviceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class DeviceServiceImpl implements DeviceService {
@@ -30,5 +35,17 @@ public class DeviceServiceImpl implements DeviceService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Device> devicePage = deviceRepository.findAll(pageRequest);
         return devicePage.map(DeviceDto::fromEntity);
+    }
+
+    @Override
+    public DeviceDto findById(UUID id) throws DataNotFoundException {
+        Optional<Device> deviceOptional = deviceRepository.findById(id);
+
+        if (deviceOptional.isEmpty()) {
+            throw new DataNotFoundException(ErrorCode.DEVICE_NOT_FOUND);
+        }
+
+        Device device = deviceOptional.get();
+        return DeviceDto.fromEntity(device);
     }
 }

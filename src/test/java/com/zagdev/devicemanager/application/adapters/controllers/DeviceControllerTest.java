@@ -76,4 +76,21 @@ class DeviceControllerTest {
                 .andExpect(jsonPath("$[0].name").value("Device1"))
                 .andExpect(jsonPath("$[1].name").value("Device2"));
     }
+
+    @Test
+    void shouldGetDeviceById() throws Exception {
+        UUID id = UUID.randomUUID();
+        String name = "Device Test";
+        String type = "SENSOR";
+        Instant createdAt = Instant.now();
+        DeviceDto dto = new DeviceDto(id, name, type, createdAt);
+
+        when(deviceUseCase.findById(id)).thenReturn(dto);
+
+        mockMvc.perform(get("/devices/{id}", id.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.name").value(name))
+                .andExpect(jsonPath("$.type").value(type));
+    }
 }

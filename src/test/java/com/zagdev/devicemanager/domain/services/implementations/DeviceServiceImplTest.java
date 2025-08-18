@@ -3,6 +3,7 @@ package com.zagdev.devicemanager.domain.services.implementations;
 import com.zagdev.devicemanager.domain.dto.DeviceDto;
 import com.zagdev.devicemanager.domain.entities.Device;
 import com.zagdev.devicemanager.domain.enums.DeviceType;
+import com.zagdev.devicemanager.domain.exceptions.DataNotFoundException;
 import com.zagdev.devicemanager.domain.repositories.DeviceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,11 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -69,5 +72,29 @@ class DeviceServiceImplTest {
         assertEquals("Device2", result.getContent().get(0).name());
         assertEquals("Device1", result.getContent().get(1).name());
         verify(deviceRepository, times(1)).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void shouldReturnDeviceWhenFound() throws DataNotFoundException {
+        UUID id = UUID.randomUUID();
+        Instant now = Instant.now();
+
+        Device device = new Device(id, "Device2", DeviceType.MODEM, now);
+
+        when(deviceRepository.findById(id)).thenReturn(Optional.of(device));
+
+        DeviceDto result = deviceService.findById(id);
+
+        assertEquals(id, result.id());
+        verify(deviceRepository).findById(id);
+    }
+
+    @Test
+    void shouldThrownExceptionWhenDeviceNotFound() {
+        UUID id = UUID.randomUUID();
+        when(deviceRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(DataNotFoundException.class, () -> deviceService.findById(id));
+        verify(deviceRepository).findById(id);
     }
 }

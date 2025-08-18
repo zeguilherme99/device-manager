@@ -1,6 +1,7 @@
 package com.zagdev.devicemanager.domain.usecases.implementations;
 
 import com.zagdev.devicemanager.domain.dto.DeviceDto;
+import com.zagdev.devicemanager.domain.exceptions.DataNotFoundException;
 import com.zagdev.devicemanager.domain.services.DeviceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,5 +64,18 @@ class DeviceUseCaseImplTest {
         assertEquals(2, result.getTotalElements());
         assertEquals("Device1", result.getContent().get(0).name());
         assertEquals("Device2", result.getContent().get(1).name());
+    }
+
+    @Test
+    void getDeviceById() throws DataNotFoundException {
+        UUID id = UUID.randomUUID();
+        DeviceDto dto = new DeviceDto(id, "Device Test", "SENSOR", Instant.now());
+
+        when(deviceService.findById(id)).thenReturn(dto);
+
+        DeviceDto result = deviceUseCase.findById(id);
+
+        assertEquals(dto, result);
+        verify(deviceService).findById(id);
     }
 }
