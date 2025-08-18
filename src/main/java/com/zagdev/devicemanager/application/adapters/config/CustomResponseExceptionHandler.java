@@ -4,6 +4,7 @@ import com.zagdev.devicemanager.domain.exceptions.DataNotFoundException;
 import com.zagdev.devicemanager.domain.exceptions.ErrorCode;
 import com.zagdev.devicemanager.domain.exceptions.InvalidDataException;
 import com.zagdev.devicemanager.domain.exceptions.UnexpectedErrorException;
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -110,5 +111,11 @@ public class CustomResponseExceptionHandler extends ResponseEntityExceptionHandl
     public ResponseEntity<ResponseError.ResponseErrorMessage> dataNotFoundException(DataNotFoundException ex) {
         logger.info(ex.getMessage(), ex);
         return new ResponseEntity<>(ResponseError.build(ex.getErrorCode()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ResponseError.ResponseErrorMessage> feignException(FeignException ex) {
+        logger.info(ex.getMessage(), ex);
+        return new ResponseEntity<>(ResponseError.build(ErrorCode.UNEXPECTED_ERROR), HttpStatus.BAD_GATEWAY);
     }
 }

@@ -4,6 +4,7 @@ import com.zagdev.devicemanager.domain.exceptions.DataNotFoundException;
 import com.zagdev.devicemanager.domain.exceptions.ErrorCode;
 import com.zagdev.devicemanager.domain.exceptions.InvalidDataException;
 import com.zagdev.devicemanager.domain.exceptions.UnexpectedErrorException;
+import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,6 +86,22 @@ class CustomResponseExceptionHandlerTest {
         assertEquals(ErrorCode.INVALID_DATA.getMessage(), responseErrorMessage.message());
         assertEquals(ErrorCode.INVALID_DATA.getTitle(), responseErrorMessage.title());
         assertEquals(ErrorCode.INVALID_DATA.getCode(), responseErrorMessage.code());
+        assertTrue(responseErrorMessage.fieldErrors().isEmpty());
+    }
+
+    @Test
+    void testFeignException() {
+        FeignException feignException = mock(FeignException.class);
+        when(feignException.getMessage()).thenReturn("Erro Feign");
+        ResponseEntity<ResponseError.ResponseErrorMessage> responseError = customResponseExceptionHandler.feignException(feignException);
+
+        HttpStatusCode httpStatusCode = responseError.getStatusCode();
+        ResponseError.ResponseErrorMessage responseErrorMessage = responseError.getBody();
+
+        assertEquals(HttpStatus.BAD_GATEWAY, httpStatusCode);
+        assertEquals(ErrorCode.UNEXPECTED_ERROR.getMessage(), responseErrorMessage.message());
+        assertEquals(ErrorCode.UNEXPECTED_ERROR.getTitle(), responseErrorMessage.title());
+        assertEquals(ErrorCode.UNEXPECTED_ERROR.getCode(), responseErrorMessage.code());
         assertTrue(responseErrorMessage.fieldErrors().isEmpty());
     }
 
