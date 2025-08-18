@@ -44,7 +44,7 @@ class DeviceServiceImplTest {
 
         DeviceDto request = new DeviceDto(deviceId, "DeviceName", "DeviceType", createdAt);
         Device savedDevice = new Device(deviceId, "DeviceName", DeviceType.MODEM, createdAt);
-        DeviceDto expectedResponse = new DeviceDto(deviceId, "DeviceName", "modem", createdAt);
+        DeviceDto expectedResponse = new DeviceDto(deviceId, "DeviceName", "MODEM", createdAt);
 
         when(deviceRepository.save(any(Device.class))).thenReturn(savedDevice);
 
