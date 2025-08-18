@@ -10,8 +10,4 @@ public enum DeviceType {
             return OTHER;
         }
     }
-
-    public String toValue() {
-        return name().toLowerCase();
-    }
 }

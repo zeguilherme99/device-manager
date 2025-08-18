@@ -12,7 +12,7 @@ public record DeviceDto(UUID id, String name, String type, Instant createdAt) {
         return new DeviceDto(
                 deviceEntity.getId(),
                 deviceEntity.getName(),
-                deviceEntity.getType().toValue(),
+                deviceEntity.getType().name(),
                 deviceEntity.getCreatedAt()
         );
     }
