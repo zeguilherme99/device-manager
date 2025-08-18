@@ -1,11 +1,19 @@
 package com.zagdev.devicemanager.application.adapters.controllers;
 
 
+import com.zagdev.devicemanager.application.adapters.config.ResponseError;
 import com.zagdev.devicemanager.application.adapters.dto.DeviceRequest;
 import com.zagdev.devicemanager.application.adapters.dto.DeviceResponse;
 import com.zagdev.devicemanager.domain.dto.DeviceDto;
 import com.zagdev.devicemanager.domain.exceptions.DataNotFoundException;
 import com.zagdev.devicemanager.domain.usecases.DeviceUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +27,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/devices")
+@Tag(name = "Device", description = "Device Manager API")
 public class DeviceController {
 
     private final Logger logger = LoggerFactory.getLogger(DeviceController.class);
@@ -30,6 +39,13 @@ public class DeviceController {
     }
 
     @PostMapping
+    @Operation(summary = "Create new device", description = "Creates a new device with the data provided in the request body.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Device successfully created",
+                    content = @Content(schema = @Schema(implementation = DeviceResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request",
+                    content = @Content(schema = @Schema(implementation = ResponseError.ResponseErrorMessage.class)))
+    })
     public ResponseEntity<DeviceResponse> createDevice(@Valid @RequestBody DeviceRequest request) {
         logger.info("Controller: Received request to create device for name [{}]", request.name());
         DeviceDto deviceDto = DeviceDto.fromRequest(request);
@@ -42,6 +58,13 @@ public class DeviceController {
     }
 
     @GetMapping
+    @Operation(summary = "List devices", description = "Returns a paginated list of devices.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of devices returned successfully",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = DeviceResponse.class)))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ResponseError.ResponseErrorMessage.class)))
+    })
     public ResponseEntity<List<DeviceResponse>> listDevices(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size) {
@@ -54,6 +77,13 @@ public class DeviceController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get device by ID", description = "Returns the data of a device by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Device found",
+                    content = @Content(schema = @Schema(implementation = DeviceResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Device not found",
+                    content = @Content(schema = @Schema(implementation = ResponseError.ResponseErrorMessage.class)))
+    })
     public ResponseEntity<DeviceResponse> getDeviceById(@PathVariable UUID id) throws DataNotFoundException {
         logger.info("Controller: Received request to get device by id [{}]", id);
         DeviceDto deviceDto = deviceUseCase.findById(id);
