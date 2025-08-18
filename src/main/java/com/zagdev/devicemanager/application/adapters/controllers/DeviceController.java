@@ -6,13 +6,12 @@ import com.zagdev.devicemanager.application.adapters.dto.DeviceResponse;
 import com.zagdev.devicemanager.domain.dto.DeviceDto;
 import com.zagdev.devicemanager.domain.usecases.DeviceUseCase;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/devices")
@@ -32,5 +31,14 @@ public class DeviceController {
         return ResponseEntity
                 .created(URI.create("/devices/" + result.id()))
                 .body(resp);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DeviceResponse>> listDevices(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        Page<DeviceDto> devicePage = deviceUseCase.findAll(page, size);
+        Page<DeviceResponse> responsePage = devicePage.map(DeviceResponse::from);
+        return ResponseEntity.ok(responsePage.getContent());
     }
 }

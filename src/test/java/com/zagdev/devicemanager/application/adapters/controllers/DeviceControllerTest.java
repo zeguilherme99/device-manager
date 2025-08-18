@@ -8,14 +8,18 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -55,5 +59,21 @@ class DeviceControllerTest {
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.name").value(name))
                 .andExpect(jsonPath("$.type").value(type));
+    }
+
+    @Test
+    void shouldListDevices() throws Exception {
+        DeviceDto dto1 = new DeviceDto(UUID.randomUUID(), "Device1", "SENSOR", Instant.now());
+        DeviceDto dto2 = new DeviceDto(UUID.randomUUID(), "Device2", "MODEM", Instant.now());
+        Page<DeviceDto> page = new PageImpl<>(List.of(dto1, dto2));
+
+        when(deviceUseCase.findAll(0, 10)).thenReturn(page);
+
+        mockMvc.perform(get("/devices")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Device1"))
+                .andExpect(jsonPath("$[1].name").value("Device2"));
     }
 }

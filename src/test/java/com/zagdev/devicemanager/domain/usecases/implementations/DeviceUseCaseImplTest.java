@@ -7,11 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,4 +50,18 @@ class DeviceUseCaseImplTest {
         verify(deviceService).create(request);
     }
 
+    @Test
+    void shouldListDevices() {
+        DeviceDto dto1 = new DeviceDto(UUID.randomUUID(), "Device1", "SENSOR", Instant.now());
+        DeviceDto dto2 = new DeviceDto(UUID.randomUUID(), "Device2", "MODEM", Instant.now());
+        Page<DeviceDto> page = new PageImpl<>(List.of(dto1, dto2));
+
+        when(deviceService.findAll(0, 10)).thenReturn(page);
+
+        Page<DeviceDto> result = deviceUseCase.findAll(0, 10);
+
+        assertEquals(2, result.getTotalElements());
+        assertEquals("Device1", result.getContent().get(0).name());
+        assertEquals("Device2", result.getContent().get(1).name());
+    }
 }
