@@ -2,7 +2,7 @@ create table if not exists devices (
     id uuid primary key,
     name text not null,
     type varchar(32) not null,
-    created_at timestamptz not null default now(),
+    created_at timestamp not null default now(),
     version bigint not null default 0
 );
 
