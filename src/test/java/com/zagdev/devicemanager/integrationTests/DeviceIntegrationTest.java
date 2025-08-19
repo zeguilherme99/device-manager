@@ -39,7 +39,7 @@ public class DeviceIntegrationTest {
 
     @Test
     void shouldReturnBadRequestWhenCreateDeviceWithInvalidData() throws Exception {
-        DeviceRequest request = new DeviceRequest("", ""); // inválido
+        DeviceRequest request = new DeviceRequest("", "");
         mockMvc.perform(post("/devices")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
